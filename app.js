@@ -5,46 +5,22 @@ const cookieParser=require('cookie-parser');
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(cookieParser());
-
+app.use('/static',express.static('public'));
+const err=new Error('404 error');
 app.set('view engine','pug');//setting up pug
 
-app.use((req,res,next)=>{
-	console.log('one');
-	next();
-},
-(req,res,next)=>{
-	console.log('two');
-	next();
-});
+const mainRoutes=require('./routes');
+const cardRoutes=require('./routes/cards');
 
-app.get('/',(req,res)=>{
-	const name=req.cookies.username;
-	if(name){
-	res.render('index',{name});
-	}
-	else{
-	res.redirect('/hello');
-	}
-});
-app.get('/cards',(req,res)=>{
-	res.render('card',{prompt:"Question1",hint:"hint"});
-});
-app.get('/hello',(req,res)=>{
-	const name=req.cookies.username;
-	if(name){
-		res.redirect('/');
-	}
-	else{
-		res.render('hello');
-	}
-});
-app.post('/hello',(req,res)=>{
-	res.cookie('username',req.body.username);
-	res.redirect('/');
-});
-app.post('/goodbye',(req,res)=>{
-	res.clearCookie('username');
-	res.redirect('/hello');
+app.use(mainRoutes);
+app.use('/cards',cardRoutes);
+
+
+app.use((err,req,res,next) =>{
+	
+
+	res.locals.error=err;
+	res.render('error');
 });
 app.listen(3000,()=>{
 	console.log("App is running");
